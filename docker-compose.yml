@@ -1,0 +1,59 @@
+version: "2"
+services:
+  namenode-primary-data:
+    image: dennybaa/hadoop
+    command: /format-namenode.sh
+    network_mode: none
+
+  datanode-data-1:
+    image: dennybaa/hadoop
+    command: /bin/true
+    network_mode: none
+
+  datanode-data-2:
+    image: dennybaa/hadoop
+    command: /bin/true
+    network_mode: none
+
+  bootstrap-hdfs:
+    image: dennybaa/hadoop
+    command: /bootstrap-hdfs.sh
+    depends_on:
+      - datanode-1
+      - namenode-primary
+    environment:
+      - WAITFORSTART=20
+      - HADOOP_NAMENODE_ADDRESS=namenode
+
+  namenode-primary:
+    image: dennybaa/hadoop
+    container_name: namenode
+    command: /start.sh namenode
+    environment:
+      - WAITFORSTART=5
+    volumes_from:
+      - namenode-primary-data
+    ports:
+      - 50070:50070
+
+  datanode-1:
+    image: dennybaa/hadoop
+    command: /start.sh datanode
+    depends_on:
+      - namenode-primary
+    environment:
+      - HADOOP_NAMENODE_ADDRESS=namenode
+      - WAITFORSTART=15
+    volumes_from:
+      - datanode-data-1
+
+  datanode-2:
+    image: dennybaa/hadoop
+    command: /start.sh datanode
+    depends_on:
+      - namenode-primary
+    environment:
+      - HADOOP_NAMENODE_ADDRESS=namenode
+      - WAITFORSTART=15
+    volumes_from:
+      - datanode-data-2

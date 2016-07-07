@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<!--
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. See accompanying LICENSE file.
+-->
+
+<configuration>
+<property>
+    <name>dfs.namenode.name.dir</name>
+    <value>file:///hadoop/dfs/name</value>
+</property>
+
+<!-- Don't perform reverse DNS check for datanode when
+they connect to namenode -->
+<property>
+    <name>dfs.namenode.datanode.registration.ip-hostname-check</name>
+    <value>false</value>
+</property>
+
+<!--  Hadoop has a bug with difficult DNS names like -
+        dockerhadoop_namenode-primary_1.dockerhadoop_default:9000.
+      DataNode fails to start in such case, so we resolve to IP!
+-->
+<property>
+    <name>dfs.namenode.rpc-address</name>
+    {{$namenode_address := getenv "HADOOP_NAMENODE_ADDRESS" -}}
+    <value>{{with $a := lookupIP $namenode_address}}{{index $a 0}}{{end}}:9000</value>
+</property>
+
+<property>
+    <name>dfs.namenode.checkpoint.dir</name>
+    <value>file:///hadoop/dfs/sname1</value>
+</property>
+
+<property>
+    <name>dfs.datanode.data.dir</name>
+    <value>file:///hadoop/dfs/data1</value>
+</property>
+</configuration>

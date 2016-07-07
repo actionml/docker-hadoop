@@ -1,0 +1,5 @@
+[template]
+src = "hdfs-site.xml.tmpl"
+dest = "/etc/hadoop/hdfs-site.xml"
+owner = "hadoop"
+mode = "0644"

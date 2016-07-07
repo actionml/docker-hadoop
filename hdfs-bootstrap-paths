@@ -1,0 +1,7 @@
+# This file configures HDFS bootstrapping
+# Provide a space separted list for: path user perms group 
+/hbase
+/zookeeper
+/models aml 1755
+/user
+/user/aml aml 1755
