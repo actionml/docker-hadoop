@@ -1,0 +1,29 @@
+language: bash
+services: docker
+
+env:
+  global:
+    - PROJECT=hadoop
+    - NAMESPACE=dennybaa
+
+install:
+  - git clone https://github.com/docker-library/official-images.git ~/official-images
+
+before_script:
+  - export tag=latest
+  - test "${TRAVIS_BRANCH}" != "master" && export tag=${TRAVIS_BRANCH} || true
+
+script:
+  - docker build -t $NAMESPACE/$PROJECT:$tag .
+  - docker tag $NAMESPACE/$PROJECT:$tag $NAMESPACE/$PROJECT:latest
+  - ~/official-images/test/run.sh $NAMESPACE/$PROJECT:$tag
+
+after_script:
+  - docker images
+
+after_success:
+  - if [[ "${TRAVIS_REPO_SLUG}" =~ "${NAMESPACE}/" ]]; then
+      docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+      docker push $NAMESPACE/$PROJECT:$tag;
+      docker push $NAMESPACE/$PROJECT:latest;
+    fi
