@@ -2,8 +2,12 @@
 # Script locates ip for a namenode to bind to. Generates config and starts namenode/datanode.
 # expects: HADOOP_HOME, HADOOP_HDFS_USER
 
-export HADOOP_NAMENODE_ADDRESS
+# hadoop-env.sh is not used!!! If env should be passed the propper way
+# is to use docker --env-file option.
 
+: ${HADOOP_HOME:?Must be provided\!}
+: ${HADOOP_HDFS_USER:?Must be provided\!}
+export HADOOP_NAMENODE_ADDRESS
 
 setup_namenode() {
   export HADOOP_NAMENODE_BINDIF=${HADOOP_NAMENODE_BINDIF:-eth0}

@@ -27,6 +27,8 @@ VOLUME [ "/etc/hadoop", "/hadoop/dfs/name", "/hadoop/dfs/sname1", "/hadoop/dfs/d
 
 # Hadoop defaults
 ENV HADOOP_OPTS -Djava.net.preferIPv4Stack=true
+ENV HADOOP_PORTMAP_OPTS -Xmx512m
+ENV HADOOP_CLIENT_OPTS -Xmx512m
 
 # Add confd configuration files
 ADD ./conf.d /etc/confd/conf.d
