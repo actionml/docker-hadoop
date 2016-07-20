@@ -29,7 +29,7 @@ docker run -it --name primary-namenode-data actionml/hadoop /format-namenode.sh
 # service container
 docker run -d --name primary-namenode -p 50070:50070 --volumes-from primary-namenode-data actionml/hadoop /start.sh namenode
 # wait for start (follow logs and ^C)
-docker logs -f primary-datanode
+docker logs -f primary-namenode
 ```
 
 ### Starting datanode
