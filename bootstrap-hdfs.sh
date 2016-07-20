@@ -40,7 +40,7 @@ sleep ${WAITFORSTART:-0}
 
 # Configure hadoop from template (confd)
 #
-/bin/confd -onetime -backend env
+confd -onetime -backend env
 
 # Bootstrap given paths (by reading a space delemitered list)
 if [ ! -f /hadoop/dfs/data1/.bootstrapped ]; then

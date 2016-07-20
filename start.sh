@@ -41,7 +41,7 @@ esac
 
 # Configure hadoop from template (confd)
 #
-/bin/confd -onetime -backend env
+confd -onetime -backend env
 
 # Start namenode
 exec su -c "exec $HADOOP_HOME/bin/hdfs $service" $HADOOP_HDFS_USER
