@@ -25,9 +25,9 @@ First we create a primary namenode data container and format it then we run the 
 
 ```
 # data container
-docker run -it --name primary-namenode-data actionml/hadoop /format-namenode.sh
+docker run -it --name primary-namenode-data actionml/hadoop format-namenode
 # service container
-docker run -d --name primary-namenode -p 50070:50070 --volumes-from primary-namenode-data actionml/hadoop /start.sh namenode
+docker run -d --name primary-namenode -p 50070:50070 --volumes-from primary-namenode-data actionml/hadoop hdfs namenode
 # wait for start (follow logs and ^C)
 docker logs -f primary-namenode
 ```
@@ -48,10 +48,10 @@ ___
 ```
 # (change number to reflect the actual container creation number)
 # data container 
-docker run -it --name datanode-data-1 actionml/hadoop /bin/true
+docker run -it --name datanode-data-1 actionml/hadoop true
 
 # datanode service
-docker run -d --name datanode-1 -e HADOOP_NAMENODE_ADDRESS=$namenode_ip --volumes-from datanode-data-1 actionml/hadoop /start.sh datanode
+docker run -d --name datanode-1 -e HADOOP_NAMENODE_ADDRESS=$namenode_ip --volumes-from datanode-data-1 actionml/hadoop hdfs datanode
 
 # wait for start (follow logs and ^C)
 docker logs -f datanode-1
@@ -62,7 +62,7 @@ docker logs -f datanode-1
 To bootstrap HDFS you can use this container for example like this:
 
 ```
-docker run --rm -it -e HADOOP_NAMENODE_ADDRESS=$namenode_ip actionml/hadoop /bootstrap-hdfs.sh
+docker run --rm -it -e HADOOP_NAMENODE_ADDRESS=$namenode_ip actionml/hadoop bootstrap-hdfs
 ```
 
 Mind that the operation is of **run-once** nature, so there's no need to run it twice.
@@ -70,4 +70,4 @@ The bootstrap process can be tuned, just [hdfs-bootstrap-paths](hdfs-bootstrap-p
 
 # Authors
 
-* Denis Baryshev (<dennybaa@gmail.com>)
+- Denis Baryshev (<dennybaa@gmail.com>)
