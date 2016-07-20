@@ -26,22 +26,23 @@ setup_datanode() {
 #
 sleep ${WAITFORSTART:-0}
 
-## Choose start up mode
+## Handle startup bahaviour
 #
-service=$1; shift
-case $service in
-  namenode|datanode)
-    eval setup_$service
-  ;;
+case $1 in
+  hdfs)
+    shift
+    [ -z "$1" ] || eval setup_$1
+
+    # Configure hadoop from template (confd) and run hdfs command
+    confd -onetime -backend env
+    exec su -c "exec $HADOOP_HOME/bin/hdfs $1" $HADOOP_HDFS_USER
+    ;;
   *)
-    >&2 echo "Hadoop container supports modes: namenode, datanode!"
-    exit 1
-  ;;
+    # Start helper script if any
+    [ -x "/$1.sh" ] && exec "/$1.sh"
+
+    # Fallback for other commands
+    cmdline="$@"
+    exec ${cmdline:-/bin/bash}
+    ;;
 esac
-
-# Configure hadoop from template (confd)
-#
-confd -onetime -backend env
-
-# Start namenode
-exec su -c "exec $HADOOP_HOME/bin/hdfs $service" $HADOOP_HDFS_USER

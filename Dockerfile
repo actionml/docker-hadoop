@@ -1,4 +1,4 @@
-FROM java:8-jre-alpine
+FROM java:8-jre
 MAINTAINER Denis Baryshev <dennybaa@gmail.com>
 
 ENV HADOOP_VERSION 2.7.2
@@ -8,9 +8,6 @@ ENV HADOOP_HDFS_USER hdfs
 
 LABEL vendor=ActionML \
       version_tags="[\"2.7\",\"2.7.2\"]"
-
-# Update alpine and install required tools
-RUN apk update && apk add --update bash curl
 
 # Fetch, unpack hadoop dist and prepare layout
 RUN curl -L http://www-us.apache.org/dist/hadoop/common/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz \
@@ -25,9 +22,7 @@ RUN curl -L https://github.com/kelseyhightower/confd/releases/download/v0.12.0-a
          -o /usr/local/bin/confd && chmod 755 /usr/local/bin/confd
 
 # Create users (to go "non-root") and set directory permissions
-RUN curl -L http://dl-cdn.alpinelinux.org/alpine/edge/testing/x86_64/shadow-4.2.1-r3.apk \
-         -o /tmp/shadow.apk && apk add /tmp/shadow.apk && rm /tmp/* && \
-    useradd -mU -d /home/hadoop hadoop && passwd -d hadoop && \
+RUN useradd -mU -d /home/hadoop hadoop && passwd -d hadoop && \
     useradd -mU -d /home/hdfs -G hadoop hdfs && passwd -d hdfs && \
     chown -R hdfs:hdfs /hadoop/dfs
 
@@ -44,6 +39,8 @@ ADD ./templates /etc/confd/templates
 
 ADD ./hdfs-site.xml ./hdfs-bootstrap-paths ${HADOOP_CONF_DIR}/
 ADD ./*.sh /
+
+ENTRYPOINT [ "/entrypoint.sh" ]
 
 # HDFS exposed ports
 EXPOSE 9000 50010 50020 50070 50075 50090
