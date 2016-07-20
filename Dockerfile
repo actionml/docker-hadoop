@@ -22,7 +22,7 @@ RUN curl -L http://www-us.apache.org/dist/hadoop/common/hadoop-$HADOOP_VERSION/h
                /hadoop/dfs/data1
 
 RUN curl -L https://github.com/kelseyhightower/confd/releases/download/v0.12.0-alpha3/confd-0.12.0-alpha3-linux-amd64 \
-         -o -o /usr/local/bin/confd && chmod 755 /usr/local/bin/confd
+         -o /usr/local/bin/confd && chmod 755 /usr/local/bin/confd
 
 # Create users (to go "non-root") and set directory permissions
 RUN curl -L http://dl-cdn.alpinelinux.org/alpine/edge/testing/x86_64/shadow-4.2.1-r3.apk \

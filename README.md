@@ -1,4 +1,4 @@
-[![DockerHub](https://img.shields.io/badge/docker-available-blue.svg)](https://hub.docker.com/r/dennybaa/hadoop) [![Build Status](https://travis-ci.org/dennybaa/docker-hadoop.svg?branch=master)](https://travis-ci.org/dennybaa/docker-hadoop)
+[![DockerHub](https://img.shields.io/badge/docker-available-blue.svg)](https://hub.docker.com/r/actionml/hadoop) [![Build Status](https://travis-ci.org/actionml/docker-hadoop.svg?branch=master)](https://travis-ci.org/actionml/docker-hadoop)
 # Docker Hadoop containers
 
 These containers currently provide ability to deploy a standalone hadoop cluster which can contain two types of nodes: namenodes and datanodes. Hadoop architecture presumes that namenode (as well as secondary namenode) is run on separate host with datanodes. Namenode contains the whole HDFS cluster metadata which requires big amount of RAM while datanodes usually placed on commodity hardware and basically provide storage.
@@ -25,9 +25,9 @@ First we create a primary namenode data container and format it then we run the 
 
 ```
 # data container
-docker run -it --name primary-namenode-data dennybaa/hadoop /format-namenode.sh
+docker run -it --name primary-namenode-data actionml/hadoop /format-namenode.sh
 # service container
-docker run -d --name primary-namenode -p 50070:50070 --volumes-from primary-namenode-data dennybaa/hadoop /start.sh namenode
+docker run -d --name primary-namenode -p 50070:50070 --volumes-from primary-namenode-data actionml/hadoop /start.sh namenode
 # wait for start (follow logs and ^C)
 docker logs -f primary-datanode
 ```
@@ -48,10 +48,10 @@ ___
 ```
 # (change number to reflect the actual container creation number)
 # data container 
-docker run -it --name datanode-data-1 dennybaa/hadoop /bin/true
+docker run -it --name datanode-data-1 actionml/hadoop /bin/true
 
 # datanode service
-docker run -d --name datanode-1 -e HADOOP_NAMENODE_ADDRESS=$namenode_ip --volumes-from datanode-data-1 dennybaa/hadoop /start.sh datanode
+docker run -d --name datanode-1 -e HADOOP_NAMENODE_ADDRESS=$namenode_ip --volumes-from datanode-data-1 actionml/hadoop /start.sh datanode
 
 # wait for start (follow logs and ^C)
 docker logs -f datanode-1
@@ -62,7 +62,7 @@ docker logs -f datanode-1
 To bootstrap HDFS you can use this container for example like this:
 
 ```
-docker run --rm -it -e HADOOP_NAMENODE_ADDRESS=$namenode_ip dennybaa/hadoop /bootstrap-hdfs.sh
+docker run --rm -it -e HADOOP_NAMENODE_ADDRESS=$namenode_ip actionml/hadoop /bootstrap-hdfs.sh
 ```
 
 Mind that the operation is of **run-once** nature, so there's no need to run it twice.
@@ -70,4 +70,4 @@ The bootstrap process can be tuned, just [hdfs-bootstrap-paths](hdfs-bootstrap-p
 
 # Authors
 
-* Denis Baryshev (dennybaa@gmail.com)
+* Denis Baryshev (<dennybaa@gmail.com>)
