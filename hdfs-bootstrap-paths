@@ -1,4 +1,4 @@
 # This file configures HDFS bootstrapping
 # Provide a space separted list for: path user perms group 
-/hbase hbase 1750
+/hbase hbase 1755
 /user
