@@ -23,8 +23,9 @@ setup_datanode() {
 }
 
 setup_volume() {
-  mkdir -p /hadoop/dfs
-  chown ${HADOOP_HDFS_USER}:${HADOOP_HDFS_USER} /hadoop/dfs
+  paths="/hadoop/dfs/name /hadoop/dfs/sname1 /hadoop/dfs/data1"
+  mkdir -p ${paths}
+  chown ${HADOOP_HDFS_USER}:${HADOOP_HDFS_USER} ${paths}
 }
 
 ## Sleep before starting up
