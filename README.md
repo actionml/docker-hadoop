@@ -25,11 +25,11 @@ First we create a primary namenode data container and format it then we run the 
 
 ```
 # data container
-docker run -it --name primary-namenode-data actionml/hadoop format-namenode
+docker run -it --name namenode-primary-data actionml/hadoop format-namenode
 # service container
-docker run -d --name primary-namenode -p 50070:50070 --volumes-from primary-namenode-data actionml/hadoop hdfs namenode
+docker run -d --name namenode-primary -p 50070:50070 --volumes-from namenode-primary-data actionml/hadoop hdfs namenode
 # wait for start (follow logs and ^C)
-docker logs -f primary-namenode
+docker logs -f namenode-primary
 ```
 
 ### Starting datanode
@@ -39,7 +39,7 @@ During this step we start datanode container, *this step can be repeated several
 As been said above let's grab the namenode IP first:
 
 ```
-namenode_ip=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' primary-namenode)
+namenode_ip=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' namenode-primary)
 ```
 
 **Create data volume and service (the bellow step can be repeated several times).**
@@ -48,10 +48,10 @@ ___
 ```
 # (change number to reflect the actual container creation number)
 # data container 
-docker run -it --name datanode-data-1 actionml/hadoop true
+docker run -it --name datanode-1-data actionml/hadoop true
 
 # datanode service
-docker run -d --name datanode-1 -e HADOOP_NAMENODE_ADDRESS=$namenode_ip --volumes-from datanode-data-1 actionml/hadoop hdfs datanode
+docker run -d --name datanode-1 -e HADOOP_NAMENODE_ADDRESS=$namenode_ip --volumes-from datanode-1-data actionml/hadoop hdfs datanode
 
 # wait for start (follow logs and ^C)
 docker logs -f datanode-1

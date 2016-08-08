@@ -22,6 +22,11 @@ setup_datanode() {
   : ${HADOOP_NAMENODE_ADDRESS:?Must be provided\!}
 }
 
+setup_volume() {
+  mkdir -p /hadoop/dfs
+  chown ${HADOOP_HDFS_USER}:${HADOOP_HDFS_USER} /hadoop/dfs
+}
+
 ## Sleep before starting up
 #
 sleep ${WAITFORSTART:-0}
@@ -35,9 +40,13 @@ case $1 in
 
     # Configure hadoop from template (confd) and run hdfs command
     confd -onetime -backend env
+
+    setup_volume
     exec su -c "exec $HADOOP_HOME/bin/hdfs $1" $HADOOP_HDFS_USER
     ;;
   *)
+    setup_volume
+
     # Start helper script if any
     [ -x "/$1.sh" ] && exec "/$1.sh"
 

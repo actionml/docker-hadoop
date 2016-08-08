@@ -1,34 +1,33 @@
 version: "2"
 services:
   namenode-primary-data:
-    image: dennybaa/hadoop
-    command: /format-namenode.sh
+    image: actionml/hadoop
+    command: format-namenode
     network_mode: none
 
-  datanode-data-1:
-    image: dennybaa/hadoop
+  datanode-1-data:
+    image: actionml/hadoop
     command: /bin/true
     network_mode: none
 
-  datanode-data-2:
-    image: dennybaa/hadoop
+  datanode-2-data:
+    image: actionml/hadoop
     command: /bin/true
     network_mode: none
 
   bootstrap-hdfs:
-    image: dennybaa/hadoop
-    command: /bootstrap-hdfs.sh
+    image: actionml/hadoop
+    command: bootstrap-hdfs
     depends_on:
       - datanode-1
       - namenode-primary
     environment:
       - WAITFORSTART=20
-      - HADOOP_NAMENODE_ADDRESS=namenode
+      - HADOOP_NAMENODE_ADDRESS=namenode-primary
 
   namenode-primary:
-    image: dennybaa/hadoop
-    container_name: namenode
-    command: /start.sh namenode
+    image: actionml/hadoop
+    command: hdfs namenode
     environment:
       - WAITFORSTART=5
     volumes_from:
@@ -37,23 +36,28 @@ services:
       - 50070:50070
 
   datanode-1:
-    image: dennybaa/hadoop
-    command: /start.sh datanode
+    image: actionml/hadoop
+    command: hdfs datanode
     depends_on:
       - namenode-primary
     environment:
-      - HADOOP_NAMENODE_ADDRESS=namenode
+      - HADOOP_NAMENODE_ADDRESS=namenode-primary
       - WAITFORSTART=15
     volumes_from:
-      - datanode-data-1
+      - datanode-1-data
 
   datanode-2:
-    image: dennybaa/hadoop
-    command: /start.sh datanode
+    image: actionml/hadoop
+    command: hdfs datanode
     depends_on:
       - namenode-primary
     environment:
-      - HADOOP_NAMENODE_ADDRESS=namenode
+      - HADOOP_NAMENODE_ADDRESS=namenode-primary
       - WAITFORSTART=15
     volumes_from:
-      - datanode-data-2
+      - datanode-2-data
+
+networks:
+  default:
+    external:
+      name: actionml
