@@ -24,7 +24,12 @@ RUN curl -L https://github.com/kelseyhightower/confd/releases/download/v0.12.0-a
 # Create users (to go "non-root") and set directory permissions
 RUN useradd -mU -d /home/hadoop hadoop && passwd -d hadoop && \
     useradd -mU -d /home/hdfs -G hadoop hdfs && passwd -d hdfs && \
+    useradd -mU -d /home/hbase -G hadoop hbase && passwd -d hbase && \
+    useradd -mU -d /home/aml -G aml && passwd -d aml && \
     chown -R hdfs:hdfs /hadoop/dfs
+
+# To ommit WARNS "No groups available for user hbase", we create hbase user above
+# as well as we create aml user.
 
 VOLUME [ "/etc/hadoop", "/hadoop/dfs/name", "/hadoop/dfs/sname1", "/hadoop/dfs/data1" ]
 

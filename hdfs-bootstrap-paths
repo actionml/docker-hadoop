@@ -2,3 +2,5 @@
 # Provide a space separted list for: path user perms group 
 /hbase hbase 1755
 /user
+/user/aml aml 1755
+/models aml 1755
