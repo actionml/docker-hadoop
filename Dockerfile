@@ -1,4 +1,4 @@
-FROM java:8-jre
+FROM java:8-jre-alpine
 MAINTAINER Denis Baryshev <dennybaa@gmail.com>
 
 ENV HADOOP_VERSION 2.7.2
@@ -8,6 +8,21 @@ ENV HADOOP_HDFS_USER hdfs
 
 LABEL vendor=ActionML \
       version_tags="[\"2.7\",\"2.7.2\"]"
+
+# Update alpine and install required tools
+RUN echo "@community http://nl.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \ 
+    apk add --update --no-cache bash curl gnupg shadow@community
+
+# Glibc compatibility
+RUN curl -sSL https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$GLIBC_APKVER/sgerrand.rsa.pub \
+            -o /etc/apk/keys/sgerrand.rsa.pub && \
+    curl -sSLO https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$GLIBC_APKVER/glibc-i18n-$GLIBC_APKVER.apk && \
+    curl -sSLO https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$GLIBC_APKVER/glibc-$GLIBC_APKVER.apk && \
+    curl -sSLO https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$GLIBC_APKVER/glibc-bin-$GLIBC_APKVER.apk && \
+    apk add --no-cache glibc-$GLIBC_APKVER.apk glibc-bin-$GLIBC_APKVER.apk glibc-i18n-$GLIBC_APKVER.apk && \
+    echo "export LANG=$LANG" > /etc/profile.d/locale.sh && \
+      rm /etc/apk/keys/sgerrand.rsa.pub glibc-*.apk
+
 
 # Fetch, unpack hadoop dist and prepare layout
 RUN curl -L http://www-us.apache.org/dist/hadoop/common/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz \
