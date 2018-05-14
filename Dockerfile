@@ -6,13 +6,27 @@ ENV HADOOP_HOME /usr/local/hadoop-${HADOOP_VERSION}
 ENV HADOOP_CONF_DIR /etc/hadoop
 ENV HADOOP_HDFS_USER hdfs
 ARG GLIBC_APKVER=2.27-r0
+ARG GOSU_VERSION=1.10
+
+# Hadoop environment variables
+ENV HADOOP_OPTS -Djava.net.preferIPv4Stack=true
+ENV HADOOP_PORTMAP_OPTS -Xmx512m
+ENV HADOOP_CLIENT_OPTS -Xmx512m
+
 
 LABEL vendor=ActionML \
       version_tags="[\"2.8\",\"2.8.3\"]"
 
-# Update alpine and install required tools
-RUN echo "@community http://nl.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \ 
-    apk add --update --no-cache bash curl gnupg shadow@community
+
+# install built-in packages and create users
+RUN echo "@community http://nl.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \
+    apk add --update --no-cache bash curl shadow@community && \
+        \
+      useradd -mU -d /home/hadoop hadoop && passwd -d hadoop && \
+      useradd -mU -d /home/hdfs -G hadoop hdfs && passwd -d hdfs && \
+      useradd -mU -d /home/hbase -G hadoop hbase && passwd -d hbase && \
+      useradd -mU -d /home/aml aml && passwd -d aml
+
 
 # Glibc compatibility
 RUN curl -sSL https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$GLIBC_APKVER/sgerrand.rsa.pub \
@@ -25,34 +39,30 @@ RUN curl -sSL https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$GL
       rm /etc/apk/keys/sgerrand.rsa.pub glibc-*.apk
 
 
+# get GoSU, confd
+RUN apk add --update --no-cache --virtual .build-deps gnupg && \
+      curl -sSL https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-amd64 \
+           -o /usr/local/bin/gosu && chmod 755 /usr/local/bin/gosu && \
+      curl -sSL -o /tmp/gosu.asc https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-amd64.asc && \
+        export GNUPGHOME=/tmp && \
+        gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 && \
+        gpg --batch --verify /tmp/gosu.asc /usr/local/bin/gosu && \
+            \
+      curl -L https://github.com/kelseyhightower/confd/releases/download/v0.12.0-alpha3/confd-0.12.0-alpha3-linux-amd64 \
+           -o /usr/local/bin/confd && chmod 755 /usr/local/bin/confd && \
+    apk del .build-deps && rm -rf /tmp/*
+
+
 # Fetch, unpack hadoop dist and prepare layout
 RUN curl -L http://www-us.apache.org/dist/hadoop/common/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz \
-      | tar -xzp -C /usr/local && \
+        | tar -xzp -C /usr/local && \
       mv ${HADOOP_HOME}/etc/hadoop /etc/ && \
       ln -s /etc/hadoop/ ${HADOOP_HOME}/etc/hadoop && \
-      mkdir -p /hadoop/dfs/name \
-               /hadoop/dfs/sname1 \
-               /hadoop/dfs/data1
+      mkdir -p /hadoop/dfs/name /hadoop/dfs/sname1 /hadoop/dfs/data1 && \
+      chown -R hdfs:hdfs /hadoop/dfs
 
-RUN curl -L https://github.com/kelseyhightower/confd/releases/download/v0.12.0-alpha3/confd-0.12.0-alpha3-linux-amd64 \
-         -o /usr/local/bin/confd && chmod 755 /usr/local/bin/confd
-
-# Create users (to go "non-root") and set directory permissions
-RUN useradd -mU -d /home/hadoop hadoop && passwd -d hadoop && \
-    useradd -mU -d /home/hdfs -G hadoop hdfs && passwd -d hdfs && \
-    useradd -mU -d /home/hbase -G hadoop hbase && passwd -d hbase && \
-    useradd -mU -d /home/aml aml && passwd -d aml && \
-    chown -R hdfs:hdfs /hadoop/dfs
-
-# To ommit WARNS "No groups available for user hbase", we create hbase user above
-# as well as we create aml user.
 
 VOLUME [ "/etc/hadoop", "/hadoop/dfs/name", "/hadoop/dfs/sname1", "/hadoop/dfs/data1" ]
-
-# Hadoop defaults
-ENV HADOOP_OPTS -Djava.net.preferIPv4Stack=true
-ENV HADOOP_PORTMAP_OPTS -Xmx512m
-ENV HADOOP_CLIENT_OPTS -Xmx512m
 
 # Add confd configuration files
 ADD ./conf.d /etc/confd/conf.d

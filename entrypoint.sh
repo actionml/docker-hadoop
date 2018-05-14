@@ -7,8 +7,10 @@
 
 : ${HADOOP_HOME:?Must be provided\!}
 : ${HADOOP_HDFS_USER:?Must be provided\!}
+
 export HADOOP_NAMENODE_ADDRESS
 
+# Pick up Namenode address
 setup_namenode() {
   export HADOOP_NAMENODE_BINDIF=${HADOOP_NAMENODE_BINDIF:-eth0}
 
@@ -18,41 +20,48 @@ setup_namenode() {
   fi
 }
 
-setup_datanode() {
-  : ${HADOOP_NAMENODE_ADDRESS:?Must be provided\!}
-}
-
-setup_volume() {
+# Set Hadoop directories owner
+chown_volume() {
   paths="/hadoop/dfs/name /hadoop/dfs/sname1 /hadoop/dfs/data1"
   mkdir -p ${paths}
   chown ${HADOOP_HDFS_USER}:${HADOOP_HDFS_USER} ${paths}
 }
 
+# Setup before handing off to the Hadoop binary
+setup() {
+  fail=$1
+  [ -z "$fail" ] || : ${HADOOP_NAMENODE_ADDRESS:?Must be provided\!}
+
+  # write core-site.xml and hdfs-site.xml
+  confd -onetime -backend env
+
+  # chown directories
+  chown_volume
+}
+
+
 ## Sleep before starting up
 #
 sleep ${WAITFORSTART:-0}
 
-## Handle startup bahaviour
+## Handle startup behavior
 #
 case $1 in
   hdfs)
+    # Namenode picks its address automatically
     shift
-    [ -z "$1" ] || eval setup_$1
+    [ "$1" != "namenode" ] || setup_namenode
 
-    # Configure hadoop from template (confd) and run hdfs command
-    confd -onetime -backend env
-
-    setup_volume
-    exec su -c "exec $HADOOP_HOME/bin/hdfs $1" $HADOOP_HDFS_USER
+    setup fail
+    exec gosu $HADOOP_HDFS_USER $HADOOP_HOME/bin/hdfs $@
     ;;
   *)
-    setup_volume
+    setup
 
-    # Start helper script if any
+    # Start helper script if any (exec without dropping privileges)
     [ -x "/$1.sh" ] && exec "/$1.sh"
 
-    # Fallback for other commands
-    cmdline="$@"
-    exec ${cmdline:-/bin/bash}
+    # Run a random command as Hadoop user
+    exec gosu $HADOOP_HDFS_USER $@
     ;;
 esac
