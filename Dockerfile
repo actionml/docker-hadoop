@@ -1,7 +1,7 @@
 FROM java:8-jre-alpine
 MAINTAINER Denis Baryshev <dennybaa@gmail.com>
 
-ENV HADOOP_VERSION 2.8.3
+ENV HADOOP_VERSION 2.8.4
 ENV HADOOP_HOME /usr/local/hadoop-${HADOOP_VERSION}
 ENV HADOOP_CONF_DIR /etc/hadoop
 ENV HADOOP_HDFS_USER hdfs
@@ -15,7 +15,7 @@ ENV HADOOP_CLIENT_OPTS -Xmx512m
 
 
 LABEL vendor=ActionML \
-      version_tags="[\"2.8\",\"2.8.3\"]"
+      version_tags="[\"2.8\",\"2.8.4\"]"
 
 
 # install built-in packages and create users
