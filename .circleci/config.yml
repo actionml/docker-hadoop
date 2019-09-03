@@ -1,0 +1,86 @@
+version: 2
+jobs:
+  build:
+    docker:
+    - image: stackfeed/circle-shell
+    environment:
+      PROJECT: docker-hadoop
+      NAMESPACE: actionml
+      PUSH_NAMESPACES: actionml
+      CONTINUOUS_INTEGRATION: "yes"
+    steps:
+    - checkout
+
+  publish:
+    docker:
+    - image: docker:stable
+    environment:
+      SHORT_GIT_HASH: $(echo $CIRCLE_SHA1 | cut -c -7)
+
+    steps:
+    - checkout
+    - setup_remote_docker
+    - run:
+        name: Docker login
+        command: |
+          echo -n ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin
+    - run:
+        name: Build docker-hadoop image
+        command: |
+          case "${CIRCLE_BRANCH}" in
+            "master")
+              docker image build -f Dockerfile --build-arg GIT-HASH=${SHORT_GIT_HASH} -t actionml/docker-hadoop:latest ./
+            ;;
+            "develop")
+              echo $CIRCLE_BRANCH
+              echo $CIRCLE_TAG
+              # creates a short hash but cant figure out how to get into the tags below $(echo $CIRCLE_SHA1 | cut -c -7)
+              docker image build -f Dockerfile --build-arg GIT-HASH=${SHORT_GIT_HASH} -t actionml/docker-hadoop:${CIRCLE_BRANCH} ./
+            ;;
+            "devops")
+              echo $CIRCLE_BRANCH
+              echo $CIRCLE_TAG
+              # creates a short hash but cant figure out how to get into the tags below $(echo $CIRCLE_SHA1 | cut -c -7)
+              docker image build -f Dockerfile --build-arg GIT-HASH=${SHORT_GIT_HASH} -t actionml/docker-hadoop:${CIRCLE_BRANCH} ./
+            ;;
+            "ci")
+              docker image build -f Dockerfile --build-arg GIT-HASH=${SHORT_GIT_HASH} -t actionml/docker-hadoop:${CIRCLE_BRANCH} ./
+            ;;
+            *)
+            ;;
+          esac
+    - run:
+        name: Publish docker image
+        command: |
+          case "${CIRCLE_BRANCH}" in
+            "master")
+              docker image push actionml/docker-hadoop:latest
+            ;;
+            "develop")
+              docker image push actionml/docker-hadoop:${CIRCLE_BRANCH}
+            ;;
+            "devops")
+              docker image push actionml/docker-hadoop:${CIRCLE_BRANCH}
+            ;;
+            "ci")
+              docker image push actionml/docker-hadoop:${CIRCLE_BRANCH}
+            ;;
+            *)
+            ;;
+          esac
+  test:
+    docker:
+    - image: alpine
+    steps:
+    - run: echo "unit or other tests"
+
+workflows:
+  version: 2
+  default:
+    jobs:
+    - build
+    - test
+    - publish:
+        requires:
+        - build
+        - test
