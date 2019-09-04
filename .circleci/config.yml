@@ -16,6 +16,7 @@ jobs:
     - image: docker:stable
     environment:
       SHORT_GIT_HASH: $(echo $CIRCLE_SHA1 | cut -c -7)
+      DATE_BUILD: $(date +'%d-%m-%Y')
 
     steps:
     - checkout
@@ -41,10 +42,10 @@ jobs:
               echo $CIRCLE_BRANCH
               echo $CIRCLE_TAG
               # creates a short hash but cant figure out how to get into the tags below $(echo $CIRCLE_SHA1 | cut -c -7)
-              docker image build -f Dockerfile --build-arg GIT-HASH=${SHORT_GIT_HASH} -t actionml/docker-hadoop:${CIRCLE_BRANCH} ./
+              docker image build -f Dockerfile --build-arg GIT_HASH=${SHORT_GIT_HASH} --build-arg DATE_BUILD=${DATE_BUILD} -t actionml/docker-hadoop:${CIRCLE_BRANCH} ./
             ;;
             "ci")
-              docker image build -f Dockerfile --build-arg GIT-HASH=${SHORT_GIT_HASH} -t actionml/docker-hadoop:${CIRCLE_BRANCH} ./
+              docker image build -f Dockerfile --build-arg GIT_HASH=${SHORT_GIT_HASH} --build-arg DATE_BUILD=${DATE_BUILD} -t actionml/docker-hadoop:${CIRCLE_BRANCH} ./
             ;;
             *)
             ;;
@@ -61,6 +62,12 @@ jobs:
             ;;
             "devops")
               docker image push actionml/docker-hadoop:${CIRCLE_BRANCH}
+              
+              docker tag actionml/docker-hadoop:${CIRCLE_BRANCH} actionml/docker-hadoop:${SHORT_GIT_HASH}
+              docker image push actionml/docker-hadoop:${SHORT_GIT_HASH}
+              
+              docker tag actionml/docker-hadoop:${CIRCLE_BRANCH} actionml/docker-hadoop:${DATE_BUILD}
+              docker image push actionml/docker-hadoop:${DATE_BUILD}
             ;;
             "ci")
               docker image push actionml/docker-hadoop:${CIRCLE_BRANCH}
