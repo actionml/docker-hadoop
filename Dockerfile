@@ -50,8 +50,9 @@ RUN apk add --update --no-cache --virtual .build-deps gnupg && \
       curl -sSL https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-amd64 \
            -o /usr/local/bin/gosu && chmod 755 /usr/local/bin/gosu && \
       curl -sSL -o /tmp/gosu.asc https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-amd64.asc && \
-        export GNUPGHOME=/tmp && \
-        gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 && \
+      export GNUPGHOME=/tmp && \
+      gpg --batch --keyserver hkps://pgp.mit.edu --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 && \
+      # gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 && \
       #   gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 && \
         gpg --batch --verify /tmp/gosu.asc /usr/local/bin/gosu && \
             \
