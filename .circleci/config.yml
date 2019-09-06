@@ -18,11 +18,11 @@ jobs:
     steps:
     - checkout
     - setup_remote_docker
-    # - run:
-    #     name: Docker login
-    #     command: |
-    #       echo "DOCKER_ENV_VAR - ${DOCKER_PASSWORD} - ${DOCKER_USERNAME}"
-    #       echo -n ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin
+    - run:
+        name: Docker login
+        command: |
+          echo "DOCKER_ENV_VAR - ${DOCKER_PASSWORD} - ${DOCKER_USERNAME}"
+          echo -n ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin
     - run:
         name: Build docker-hadoop image
         command: |
