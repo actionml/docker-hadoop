@@ -23,6 +23,7 @@ ENV BRANCH=${BRANCH}
 LABEL vendor=ActionML \
       version_tags="[\"2.8\",\"2.8.4\"]"
 
+RUN apk add --upgrade apk-tools
 
 # install built-in packages and create users
 RUN echo "@community http://nl.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \
