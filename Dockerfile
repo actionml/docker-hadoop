@@ -46,6 +46,10 @@ RUN curl -sSL https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$GL
 
 
 # get GoSU, confd
+
+RUN 	apk add --no-cache --virtual .gosu-deps \
+		ca-certificates dpkg gnupg
+
 RUN apk add --update --no-cache --virtual .build-deps gnupg && \
       curl -sSL https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-amd64 \
            -o /usr/local/bin/gosu && chmod 755 /usr/local/bin/gosu && \
