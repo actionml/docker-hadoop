@@ -50,7 +50,8 @@ RUN curl -sSL https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$GL
 RUN 	apk add --no-cache --virtual .gosu-deps \
 		ca-certificates dpkg gnupg
 
-RUN apk add --update --no-cache --virtual .build-deps gnupg && \
+RUN apk add --update --no-cache --virtual .gosu-deps gnupg && \
+# RUN apk add --update --no-cache --virtual .build-deps gnupg && \
       curl -sSL https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-amd64 \
            -o /usr/local/bin/gosu && chmod 755 /usr/local/bin/gosu && \
       curl -sSL -o /tmp/gosu.asc https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-amd64.asc && \
@@ -62,7 +63,8 @@ RUN apk add --update --no-cache --virtual .build-deps gnupg && \
             \
       curl -L https://github.com/kelseyhightower/confd/releases/download/v0.12.0-alpha3/confd-0.12.0-alpha3-linux-amd64 \
            -o /usr/local/bin/confd && chmod 755 /usr/local/bin/confd && \
-    apk del .build-deps && rm -rf /tmp/*
+    apk del .gosu-deps && rm -rf /tmp/*
+#     apk del .build-deps && rm -rf /tmp/*
 
 
 # Fetch, unpack hadoop dist and prepare layout
